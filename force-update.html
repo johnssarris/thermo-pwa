@@ -1,0 +1,21 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Force Update</title></head>
+<body>
+<button id="btn">Unregister SWs & Clear Caches</button>
+<pre id="log"></pre>
+<script>
+  async function force() {
+    const log = document.getElementById('log'); const p=s=>log.textContent+=s+"\\n";
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) { await r.unregister(); p('Unregistered SW: ' + (r.scope||'')); }
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (const k of keys) { await caches.delete(k); p('Deleted cache: ' + k); }
+    }
+    p('Done. Close this page, then relaunch the app.');
+  }
+  document.getElementById('btn').addEventListener('click', force);
+</script>
+</body></html>
