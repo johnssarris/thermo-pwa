@@ -8,7 +8,7 @@
 <style>
 html,body{-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none;margin:0;height:100%;overflow:hidden;
 background:#0e1217;color:#e6e9ed;font-family:-apple-system,system-ui,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}
-.card{width:min(420px,92vw);margin:0 auto;margin-top:10vh;background:rgba(255,255,255,.05);border-radius:18px;
+.card{width:min(420px,92vw);margin:0 auto;margin-top:6vh;background:rgba(255,255,255,.05);border-radius:18px;
 padding:16px;box-shadow:0 12px 28px rgba(0,0,0,.35);backdrop-filter:blur(12px) saturate(1.05);
 -webkit-backdrop-filter:blur(12px) saturate(1.05);}
 .title{font-weight:700;font-size:15px;letter-spacing:.4px;color:#9aa0a6;text-align:center;}
@@ -18,43 +18,127 @@ font-weight:700;margin:6px;transition:background .2s,transform .05s;}
 .btn:active{transform:scale(.97);}
 .hint{text-align:center;color:#9aa0a6;font-size:12px;margin-top:14px;}
 .row{text-align:center;}
+.badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#24303b20;color:#9aa0a6;}
+.segments{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.seg{background:#26303a;color:#e6e9ed;border-radius:12px;padding:10px 14px;font-weight:600;font-size:14px;border:1px solid rgba(0,0,0,.06);
+transition:background .2s,transform .05s,border-color .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.seg:active{transform:scale(.97);}
+.seg.active{background:#34404d;border-color:rgba(0,0,0,.15);}
+.swipe-hint{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 6px);text-align:center;
+font-size:12px;color:#9aa0a6;pointer-events:none;user-select:none;opacity:0.85;}
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="title">THERMOSTAT</div>
-    <div id="temp" class="temp">72°</div>
+    <div class="row" style="justify-content:space-between;">
+      <div class="title">THERMOSTAT</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div id="badge-mode" class="badge">MODE: —</div>
+        <div id="badge-fan" class="badge">FAN: —</div>
+      </div>
+    </div>
+
+    <div id="temp" class="temp">—°</div>
+    <div class="hint" id="temp-hint">Setpoint</div>
+
     <div class="row">
       <button id="btn-up" class="btn">▲ +1°</button>
       <button id="btn-down" class="btn">▼ −1°</button>
     </div>
-    <div class="hint">Swipe up to close</div>
+
+    <div class="title">Mode</div>
+    <div class="segments" id="mode-bar">
+      <button class="seg" data-mode="heat">Heat</button>
+      <button class="seg" data-mode="cool">Cool</button>
+      <button class="seg" data-mode="off">Off</button>
+    </div>
+
+    <div class="title" style="margin-top:10px;">Fan</div>
+    <div class="segments" id="fan-bar">
+      <button class="seg" data-fan="on">On</button>
+      <button class="seg" data-fan="auto">Auto</button>
+    </div>
   </div>
 
-<script>
-let temp=72;const el=document.getElementById('temp');
-function render(){el.textContent=temp+'°';localStorage.setItem('temp',temp);}
-function changeTemp(d){temp=Math.max(40,Math.min(90,temp+d));render();}
-const saved=parseInt(localStorage.getItem('temp'),10);if(!isNaN(saved))temp=saved;render();
+  <div class="swipe-hint" aria-hidden="true">Swipe up to close</div>
 
-function setupHold(selector,delta){
- const el=document.querySelector(selector);let holdTimer,repeatTimer,accelTimer;
- const start=(e)=>{
-   e.preventDefault();changeTemp(delta);
-   holdTimer=setTimeout(()=>{
-     repeatTimer=setInterval(()=>changeTemp(delta),120);
-     accelTimer=setTimeout(()=>{clearInterval(repeatTimer);
-       repeatTimer=setInterval(()=>changeTemp(delta),60);},1000);
-   },380);
- };
- const stop=()=>{clearTimeout(holdTimer);clearTimeout(accelTimer);clearInterval(repeatTimer);};
- el.addEventListener('pointerdown',start,{passive:false});
- ['pointerup','pointerleave','pointercancel'].forEach(v=>el.addEventListener(v,stop));
- document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
- window.addEventListener('blur',stop);
+<script>
+// ---------- state helpers ----------
+function has(k){return localStorage.getItem(k)!==null;}
+function get(k,d){return has(k)?localStorage.getItem(k):d;}
+function set(k,v){localStorage.setItem(k,v);}
+
+if(!has("mode_state"))set("mode_state","off");
+if(!has("fan_state"))set("fan_state","auto");
+if(!has("heat_set"))set("heat_set","70");
+if(!has("cool_set"))set("cool_set","75");
+
+const state={
+  mode:get("mode_state","off"),
+  fan:get("fan_state","auto"),
+  heat:parseInt(get("heat_set","70"),10),
+  cool:parseInt(get("cool_set","75"),10)
+};
+
+function activeTemp(){
+  if(state.mode==="heat")return state.heat;
+  if(state.mode==="cool")return state.cool;
+  return null;
 }
-setupHold('#btn-up',+1);
-setupHold('#btn-down',-1);
+
+function render(){
+  document.getElementById("badge-mode").textContent="MODE: "+state.mode.toUpperCase();
+  document.getElementById("badge-fan").textContent="FAN: "+state.fan.toUpperCase();
+  document.querySelectorAll("#mode-bar .seg").forEach(b=>b.classList.toggle("active",b.dataset.mode===state.mode));
+  document.querySelectorAll("#fan-bar .seg").forEach(b=>b.classList.toggle("active",b.dataset.fan===state.fan));
+  const t=activeTemp();const tempEl=document.getElementById("temp");const hint=document.getElementById("temp-hint");
+  if(t==null){tempEl.textContent="—°";hint.textContent="Setpoint (mode OFF)";}
+  else{tempEl.textContent=t+"°";hint.textContent="Setpoint";}
+}
+
+function save(){
+  set("mode_state",state.mode);
+  set("fan_state",state.fan);
+  set("heat_set",state.heat);
+  set("cool_set",state.cool);
+}
+
+function changeTemp(delta){
+  if(activeTemp()==null)return;
+  if(state.mode==="heat")state.heat=Math.max(40,Math.min(90,state.heat+delta));
+  else if(state.mode==="cool")state.cool=Math.max(40,Math.min(90,state.cool+delta));
+  render();save();
+}
+
+// ---------- hold-to-repeat logic ----------
+function setupHold(el,delta){
+  let holdTimer=null,repeatTimer=null,accelTimer=null;
+  const start=(e)=>{
+    e.preventDefault();changeTemp(delta);
+    holdTimer=setTimeout(()=>{
+      repeatTimer=setInterval(()=>changeTemp(delta),120);
+      accelTimer=setTimeout(()=>{clearInterval(repeatTimer);
+        repeatTimer=setInterval(()=>changeTemp(delta),60);},1000);
+    },380);
+  };
+  const stop=()=>{clearTimeout(holdTimer);clearTimeout(accelTimer);clearInterval(repeatTimer);};
+  el.addEventListener("pointerdown",start,{passive:false});
+  ["pointerup","pointerleave","pointercancel"].forEach(v=>el.addEventListener(v,stop));
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)stop();});
+  window.addEventListener("blur",stop);
+}
+setupHold(document.getElementById("btn-up"),+1);
+setupHold(document.getElementById("btn-down"),-1);
+
+// ---------- other controls ----------
+document.querySelectorAll("#mode-bar .seg").forEach(btn=>btn.addEventListener("click",()=>{
+  state.mode=btn.dataset.mode;render();save();
+}));
+document.querySelectorAll("#fan-bar .seg").forEach(btn=>btn.addEventListener("click",()=>{
+  state.fan=btn.dataset.fan;render();save();
+}));
+
+render();
 </script>
 </body>
 </html>
