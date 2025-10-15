@@ -288,6 +288,82 @@
       }
     }
     btnUpdate.addEventListener('click',e=>{e.stopPropagation();forceUpdate();});
+
+    /* ======== TEMP SETUP BUTTONS – BFF & Ecobee wiring ======== */
+    async function fetchJSON(path, init){
+      const res = await fetch(path, { credentials: 'include', ...init });
+      if(!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    async function checkTokenStatus(){
+      updateStatus.textContent='Checking token…';
+      try{
+        const data = await fetchJSON('/token/status');
+        updateStatus.textContent = data.hasToken ? 'Ecobee: connected' : 'Ecobee: not set';
+      }catch(e){
+        updateStatus.textContent='Status check failed';
+        console.error(e);
+      }
+    }
+
+    async function promptAndSaveTokens(){
+      const access = prompt('Paste Ecobee access_token'); if(!access) return;
+      const refresh = prompt('Paste Ecobee refresh_token'); if(!refresh) return;
+      const expires_at = new Date(Date.now() + 45*60*1000).toISOString(); // temp
+      updateStatus.textContent='Saving…';
+      try{
+        await fetchJSON('/token/save', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          body: JSON.stringify({ access_token: access, refresh_token: refresh, expires_at })
+        });
+        updateStatus.textContent='Saved';
+      }catch(e){
+        updateStatus.textContent='Save failed';
+        console.error(e);
+      }
+    }
+
+    async function callBffTest(){
+      updateStatus.textContent='Calling /api/test…';
+      try{
+        const r = await fetchJSON('/api/test');
+        updateStatus.textContent = `OK @ ${new Date(r.now).toLocaleTimeString()}`;
+        console.log('BFF test:', r);
+      }catch(e){
+        updateStatus.textContent='BFF test failed';
+        console.error(e);
+      }
+    }
+
+    async function callEcobeeSummary(){
+      updateStatus.textContent='Calling Ecobee…';
+      try{
+        const res = await fetchJSON('/ecobee/summary');
+        if(res.ok){
+          const count = res.mini?.revisionListCount ?? '?';
+          updateStatus.textContent = `Ecobee OK — ${count} thermostat(s)`;
+          console.log('ecobee summary:', res);
+        }else{
+          updateStatus.textContent = `Ecobee error: ${res.error || res.status}`;
+          console.warn(res);
+        }
+      }catch(e){
+        updateStatus.textContent='Call failed';
+        console.error(e);
+      }
+    }
+
+    document.getElementById('btnTokenStatus')?.addEventListener('click', e => { e.stopPropagation(); checkTokenStatus(); });
+    document.getElementById('btnTokenSave')  ?.addEventListener('click', e => { e.stopPropagation(); promptAndSaveTokens(); });
+    document.getElementById('btnApiTest')    ?.addEventListener('click', e => { e.stopPropagation(); callBffTest(); });
+    document.getElementById('btnEcobeeTest') ?.addEventListener('click', e => { e.stopPropagation(); callEcobeeSummary(); });
+
+    // Optional: auto-check when the panel opens
+    settingsBtn.addEventListener('click', () => {
+      setTimeout(() => { if (settingsPanel.style.display === 'block') checkTokenStatus(); }, 60);
+    });
   </script>
 </body>
 </html>
