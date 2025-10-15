@@ -17,22 +17,61 @@
       --text: #e6e9ed;
       --muted: #9aa0a6;
       --button:#26303a; --button-active:#34404d;
+      --panel-bg: rgba(15,18,23,0.95);
+      --panel-border-strong: rgba(255,255,255,0.08);
     }
     @media (prefers-color-scheme: light) {
       :root {
-        --bg1:#eaf1fb; --bg2:#f7f9fe; --glass: rgba(255,255,255,0.7);
-        --glass-border: rgba(0,0,0,0.08); --text:#15202b; --muted:#5b6670;
+        --bg1:#eaf1fb; --bg2:#f7f9fe;
+        --glass: rgba(255,255,255,0.7);
+        --glass-border: rgba(0,0,0,0.08);
+        --text:#15202b; --muted:#5b6670;
         --button:#eef2f6; --button-active:#e2e8ef;
+        --panel-bg: rgba(255,255,255,0.96);
+        --panel-border-strong: rgba(0,0,0,0.12);
       }
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; overflow: hidden; font-family: -apple-system, system-ui, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; background: radial-gradient(1200px 800px at 20% -10%, var(--bg2), var(--bg1)) fixed; color: var(--text); padding-bottom: env(safe-area-inset-bottom); }
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: -apple-system, system-ui, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -10%, var(--bg2), var(--bg1)) fixed;
+      color: var(--text);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
 
-    .stage { position: relative; height: 100%; padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); display: grid; place-items: center; }
-    .dots { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.08) 30%, transparent 30%), radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,0.06) 30%, transparent 30%), radial-gradient(2px 2px at 30% 80%, rgba(255,255,255,0.05) 30%, transparent 30%); background-repeat: no-repeat; }
+    .stage {
+      position: relative;
+      height: 100%;
+      padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+      display: grid;
+      place-items: center;
+    }
+    .dots {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.08) 30%, transparent 30%),
+        radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,0.06) 30%, transparent 30%),
+        radial-gradient(2px 2px at 30% 80%, rgba(255,255,255,0.05) 30%, transparent 30%);
+      background-repeat: no-repeat;
+    }
 
-    .card { position: relative; width: min(420px, 92vw); border-radius: 18px; padding: 16px; background: var(--glass); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset; backdrop-filter: blur(14px) saturate(1.1); -webkit-backdrop-filter: blur(14px) saturate(1.1); }
+    .card {
+      position: relative;
+      width: min(420px, 92vw);
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      backdrop-filter: blur(14px) saturate(1.1);
+      -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    }
 
     .row { display:flex; gap:10px; align-items:center; justify-content:space-between; }
     .title { font-weight:700; font-size:15px; letter-spacing:.4px; color:var(--muted); }
@@ -45,29 +84,67 @@
     .badge { font-size:12px; padding:4px 8px; border-radius:999px; background:#24303b20; color:var(--muted); }
     .segments { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
 
-    .seg { background: var(--button); color: var(--text); border-radius:12px; padding:10px 14px; font-weight:600; font-size:14px; border:1px solid rgba(0,0,0,.06); transition: background .2s, transform .05s, border-color .2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .seg {
+      background: var(--button); color: var(--text);
+      border-radius:12px; padding:10px 14px; font-weight:600; font-size:14px;
+      border:1px solid rgba(0,0,0,.06);
+      transition: background .2s, transform .05s, border-color .2s;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
     .seg:active { transform: scale(.97); }
     .seg.active { background: var(--button-active); border-color: rgba(0,0,0,.15); }
 
-    .btn { min-width:72px; background:var(--button); color:var(--text); border:1px solid rgba(0,0,0,.06); border-radius:14px; padding:18px 22px; font-size:16px; font-weight:700; transition: background .2s, transform .05s, border-color .2s; }
+    .btn {
+      min-width:72px; background:var(--button); color:var(--text);
+      border:1px solid rgba(0,0,0,.06); border-radius:14px;
+      padding:18px 22px; font-size:16px; font-weight:700;
+      transition: background .2s, transform .05s, border-color .2s;
+    }
     .btn:active { transform: scale(.97); }
     .btn.up { background:#203b29; border-color:rgba(124,217,146,.35); }
     .btn.down { background:#3b2a20; border-color:rgba(255,184,107,.35); }
 
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .hint { text-align:center; color:var(--muted); font-size:12px; margin-top:10px; }
-    .swipe-hint{ position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); text-align: center; font-size: 12px; color: var(--muted, #9aa0a6); pointer-events: none; user-select: none; opacity: .9; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+
+    .swipe-hint{
+      position: fixed;
+      left: 0; right: 0;
+      bottom: calc(env(safe-area-inset-bottom) + 10px);
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted, #9aa0a6);
+      pointer-events: none;
+      user-select: none;
+      opacity: .9;
+      text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    }
 
     /* ⚙️ settings button */
-    #settingsBtn { position:absolute; top:8px; left:8px; background:none; border:none; font-size:20px; line-height:1; padding:4px; cursor:pointer; color:var(--muted); }
+    #settingsBtn {
+      position:absolute; top:8px; left:8px;
+      background:none; border:none; font-size:20px; line-height:1;
+      padding:4px; cursor:pointer; color:var(--muted);
+    }
     #settingsBtn:hover { opacity: 0.8; }
 
-    /* ⚙️ settings panel */
-    #settingsPanel { position:absolute; top:40px; left:8px; width:min(280px, calc(100% - 16px)); background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:12px; display:none; box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04) inset; backdrop-filter: blur(10px) saturate(1.05); -webkit-backdrop-filter: blur(10px) saturate(1.05); }
-    #settingsPanel header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-weight:700; font-size:14px; color:var(--muted); }
-    #closeSettings { background:none; border:none; font-size:18px; line-height:1; color:var(--muted); cursor:pointer; }
-    .settings-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; margin:8px 0; }
-    .settings-kv { color:var(--muted); }
+    /* ⚙️ solid settings panel (non-transparent) */
+    #settingsPanel{
+      position:absolute; top:40px; left:8px;
+      width:min(280px, calc(100% - 16px));
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border-strong);
+      border-radius:12px;
+      padding:12px;
+      display:none;
+      box-shadow:0 8px 24px rgba(0,0,0,.35);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    #settingsPanel header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-weight:700; font-size:14px; color:var(--muted); }
+    #closeSettings{ background:none; border:none; font-size:18px; line-height:1; color:var(--muted); cursor:pointer; }
+    .settings-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; margin:8px 0; }
+    .settings-kv{ color:var(--muted); }
 
     /* update button */
     .settings-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
@@ -79,6 +156,7 @@
 <body>
   <div class="stage">
     <div class="dots"></div>
+
     <div class="card">
       <button id="settingsBtn" aria-label="Settings">⚙️</button>
 
@@ -101,7 +179,7 @@
         <div class="title title-main">THERMOSTAT</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <div id="badge-mode" class="badge">MODE: —</div>
-          <div id="badge-fan" class="badge">FAN: —</div>
+          <div id="badge-fan"  class="badge">FAN: —</div>
         </div>
       </div>
 
@@ -113,7 +191,7 @@
       <div class="sp"></div>
 
       <div class="grid">
-        <button class="btn up" id="btn-up">▲ +1°</button>
+        <button class="btn up"   id="btn-up">▲ +1°</button>
         <button class="btn down" id="btn-down">▼ −1°</button>
       </div>
 
@@ -139,7 +217,7 @@
   <div class="swipe-hint" aria-hidden="true">Swipe up to close</div>
 
 <script>
-  // ------- State -------
+  // ------- state helpers -------
   function has(k){ return localStorage.getItem(k) !== null; }
   function get(k,d){ return has(k) ? localStorage.getItem(k) : d; }
   function set(k,v){ localStorage.setItem(k, v); }
@@ -165,11 +243,18 @@
   function render(){
     document.getElementById('badge-mode').textContent = "MODE: " + state.mode.toUpperCase();
     document.getElementById('badge-fan').textContent  = "FAN: "  + state.fan.toUpperCase();
-    document.querySelectorAll('#mode-bar .seg').forEach(b=>{ b.classList.toggle('active', b.dataset.mode === state.mode); });
-    document.querySelectorAll('#fan-bar .seg').forEach(b=>{ b.classList.toggle('active', b.dataset.fan === state.fan); });
+
+    document.querySelectorAll('#mode-bar .seg').forEach(b=>{
+      b.classList.toggle('active', b.dataset.mode === state.mode);
+    });
+    document.querySelectorAll('#fan-bar .seg').forEach(b=>{
+      b.classList.toggle('active', b.dataset.fan === state.fan);
+    });
+
     const t = activeTemp();
     const tempEl = document.getElementById('temp');
     const hint = document.getElementById('temp-hint');
+
     if (t == null) {
       tempEl.textContent = "—°";
       hint.textContent = "Setpoint (mode OFF)";
@@ -184,20 +269,43 @@
   }
 
   function save(){ set("mode_state", state.mode); set("fan_state", state.fan); set("heat_set", state.heat); set("cool_set", state.cool); }
-  function changeTemp(delta){ if (activeTemp() == null) return; if (state.mode === "heat") state.heat = Math.max(40, Math.min(90, state.heat + delta)); else if (state.mode === "cool") state.cool = Math.max(40, Math.min(90, state.cool + delta)); render(); save(); }
 
-  function setupHold(el, delta){ let holdTimer=null, repeatTimer=null, accelTimer=null; const start = (e) => { e.preventDefault(); changeTemp(delta); holdTimer = setTimeout(() => { repeatTimer = setInterval(() => changeTemp(delta), 120); accelTimer = setTimeout(() => { clearInterval(repeatTimer); repeatTimer = setInterval(() => changeTemp(delta), 60); }, 1000); }, 380); }; const stop = () => { clearTimeout(holdTimer); clearTimeout(accelTimer); clearInterval(repeatTimer); }; el.addEventListener('pointerdown', start, {passive:false}); ['pointerup','pointerleave','pointercancel'].forEach(ev => el.addEventListener(ev, stop)); document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); }); window.addEventListener('blur', stop); }
-  setupHold(document.getElementById('btn-up'),   +1);
+  function changeTemp(delta){
+    if (activeTemp() == null) return;
+    if (state.mode === "heat") state.heat = Math.max(40, Math.min(90, state.heat + delta));
+    else if (state.mode === "cool") state.cool = Math.max(40, Math.min(90, state.cool + delta));
+    render(); save();
+  }
+
+  function setupHold(el, delta){
+    let holdTimer=null, repeatTimer=null, accelTimer=null;
+    const start = (e)=>{ e.preventDefault(); changeTemp(delta);
+      holdTimer = setTimeout(()=>{ repeatTimer = setInterval(()=>changeTemp(delta),120);
+      accelTimer = setTimeout(()=>{ clearInterval(repeatTimer);
+      repeatTimer = setInterval(()=>changeTemp(delta),60); },1000); },380); };
+    const stop = ()=>{ clearTimeout(holdTimer); clearTimeout(accelTimer); clearInterval(repeatTimer); };
+    el.addEventListener('pointerdown', start, {passive:false});
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev, stop));
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stop(); });
+    window.addEventListener('blur', stop);
+  }
+  setupHold(document.getElementById('btn-up'), +1);
   setupHold(document.getElementById('btn-down'), -1);
 
-  document.querySelectorAll('#mode-bar .seg').forEach(btn=>{ btn.addEventListener('click', ()=>{ state.mode = btn.dataset.mode; render(); save(); }); });
-  document.querySelectorAll('#fan-bar .seg').forEach(btn=>{ btn.addEventListener('click', ()=>{ state.fan = btn.dataset.fan; render(); save(); }); });
+  document.querySelectorAll('#mode-bar .seg').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.mode = btn.dataset.mode; render(); save(); });
+  });
+  document.querySelectorAll('#fan-bar .seg').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.fan = btn.dataset.fan; render(); save(); });
+  });
 
   render();
 
-  if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js'); }); }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./service-worker.js'); });
+  }
 
-  // ----- Settings Panel -----
+  // ----- Settings panel -----
   const APP_VERSION = "1.0.0";
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsPanel = document.getElementById('settingsPanel');
@@ -208,24 +316,24 @@
   function showPanel(show){ settingsPanel.style.display = show ? 'block' : 'none'; }
   settingsBtn.addEventListener('click', (e)=>{ e.stopPropagation(); showPanel(settingsPanel.style.display !== 'block'); });
   closeSettings.addEventListener('click', ()=>showPanel(false));
-  document.addEventListener('click', (e)=>{ if (settingsPanel.style.display === 'block' && !settingsPanel.contains(e.target) && e.target !== settingsBtn) showPanel(false); });
-  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') showPanel(false); });
+  document.addEventListener('click', (e)=>{ if(settingsPanel.style.display==='block' && !settingsPanel.contains(e.target) && e.target!==settingsBtn) showPanel(false); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') showPanel(false); });
 
-  // ----- Force Update button -----
+  // ----- Force update -----
   const btnUpdate = document.getElementById('btnUpdate');
   const updateStatus = document.getElementById('updateStatus');
   async function forceUpdate(){
-    if (!('serviceWorker' in navigator)) { updateStatus.textContent = 'No service worker present.'; return; }
-    try {
-      updateStatus.textContent = 'Checking for update…';
+    if(!('serviceWorker' in navigator)){ updateStatus.textContent='No service worker present.'; return; }
+    try{
+      updateStatus.textContent='Checking for update…';
       const reg = await navigator.serviceWorker.getRegistration();
       await reg?.update();
-      setTimeout(()=>{ updateStatus.textContent = 'Reloading…'; window.location.reload(); }, 300);
-    } catch(e){
-      updateStatus.textContent = 'Update check failed.'; console.error(e);
+      setTimeout(()=>{ updateStatus.textContent='Reloading…'; window.location.reload(); },300);
+    }catch(e){
+      updateStatus.textContent='Update check failed.'; console.error(e);
     }
   }
-  btnUpdate.addEventListener('click', (e)=>{ e.stopPropagation(); forceUpdate(); });
+  btnUpdate.addEventListener('click',(e)=>{ e.stopPropagation(); forceUpdate(); });
 </script>
 </body>
 </html>
