@@ -4,7 +4,7 @@
 // - Avoid caching redirected responses.
 // - Bump CACHE_VERSION whenever you change the SW.
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = '__VERSION__';
 const CACHE_NAME = 'thermo-pwa-' + CACHE_VERSION;
 
 // Precache only static assets (NOT index.html or './')
