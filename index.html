@@ -8,7 +8,6 @@
   <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
   <title>Thermostat</title>
-
   <style>
     :root {
       --bg1: #0e1217;
@@ -28,151 +27,58 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; overflow: hidden; }
-    html, body {
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      overscroll-behavior: none;
-      background: radial-gradient(1200px 800px at 20% -10%, var(--bg2), var(--bg1)) fixed;
-      color: var(--text);
-      font-family: -apple-system, system-ui, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
+    html, body { height: 100%; margin: 0; overflow: hidden; font-family: -apple-system, system-ui, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; background: radial-gradient(1200px 800px at 20% -10%, var(--bg2), var(--bg1)) fixed; color: var(--text); padding-bottom: env(safe-area-inset-bottom); }
 
-    .stage {
-      position: relative;
-      height: 100%;
-      padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-      display: grid;
-      place-items: center;
-    }
+    .stage { position: relative; height: 100%; padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); display: grid; place-items: center; }
+    .dots { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.08) 30%, transparent 30%), radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,0.06) 30%, transparent 30%), radial-gradient(2px 2px at 30% 80%, rgba(255,255,255,0.05) 30%, transparent 30%); background-repeat: no-repeat; }
 
-    .dots {
-      position: absolute; inset: 0; pointer-events: none;
-      background-image:
-        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.08) 30%, transparent 30%),
-        radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,0.06) 30%, transparent 30%),
-        radial-gradient(2px 2px at 30% 80%, rgba(255,255,255,0.05) 30%, transparent 30%);
-      background-repeat: no-repeat;
-    }
-
-    .card {
-      position: relative;
-      width: min(420px, 92vw);
-      border-radius: 18px;
-      padding: 16px;
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset;
-      backdrop-filter: blur(14px) saturate(1.1);
-      -webkit-backdrop-filter: blur(14px) saturate(1.1);
-    }
-
-    /* gear button */
-    #settingsBtn {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      line-height: 1;
-      padding: 4px;
-      cursor: pointer;
-      color: var(--muted);
-    }
-    #settingsBtn:hover { opacity: 0.8; }
-
-    /* settings panel */
-    #settingsPanel {
-      position: absolute;
-      top: 40px;
-      left: 8px;
-      width: min(280px, calc(100% - 16px));
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 12px;
-      display: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04) inset;
-      backdrop-filter: blur(10px) saturate(1.05);
-      -webkit-backdrop-filter: blur(10px) saturate(1.05);
-    }
-    #settingsPanel header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    #closeSettings {
-      background: none;
-      border: none;
-      font-size: 18px;
-      line-height: 1;
-      color: var(--muted);
-      cursor: pointer;
-    }
-    .settings-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 14px;
-      margin: 8px 0;
-    }
-    .settings-kv { color: var(--muted); }
+    .card { position: relative; width: min(420px, 92vw); border-radius: 18px; padding: 16px; background: var(--glass); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04) inset; backdrop-filter: blur(14px) saturate(1.1); -webkit-backdrop-filter: blur(14px) saturate(1.1); }
 
     .row { display:flex; gap:10px; align-items:center; justify-content:space-between; }
     .title { font-weight:700; font-size:15px; letter-spacing:.4px; color:var(--muted); }
     .title-main { margin-left: 32px; }
+
     .sp { height:12px; }
     .temp { font-size:56px; font-weight:800; text-align:center; line-height:1; letter-spacing:.5px; }
     @media (max-width:350px){ .temp{ font-size:42px; } }
+
     .badge { font-size:12px; padding:4px 8px; border-radius:999px; background:#24303b20; color:var(--muted); }
     .segments { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
-    .seg {
-      background: var(--button); color: var(--text);
-      border-radius:12px; padding:10px 14px; font-weight:600; font-size:14px;
-      border:1px solid rgba(0,0,0,.06);
-      transition: background .2s, transform .05s, border-color .2s;
-      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-    }
+
+    .seg { background: var(--button); color: var(--text); border-radius:12px; padding:10px 14px; font-weight:600; font-size:14px; border:1px solid rgba(0,0,0,.06); transition: background .2s, transform .05s, border-color .2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     .seg:active { transform: scale(.97); }
     .seg.active { background: var(--button-active); border-color: rgba(0,0,0,.15); }
-    .btn {
-      min-width:72px; background:var(--button); color:var(--text);
-      border:1px solid rgba(0,0,0,.06); border-radius:14px;
-      padding:18px 22px; font-size:16px; font-weight:700;
-      transition: background .2s, transform .05s, border-color .2s;
-    }
+
+    .btn { min-width:72px; background:var(--button); color:var(--text); border:1px solid rgba(0,0,0,.06); border-radius:14px; padding:18px 22px; font-size:16px; font-weight:700; transition: background .2s, transform .05s, border-color .2s; }
     .btn:active { transform: scale(.97); }
     .btn.up { background:#203b29; border-color:rgba(124,217,146,.35); }
     .btn.down { background:#3b2a20; border-color:rgba(255,184,107,.35); }
+
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .hint { text-align:center; color:var(--muted); font-size:12px; margin-top:10px; }
+    .swipe-hint{ position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); text-align: center; font-size: 12px; color: var(--muted, #9aa0a6); pointer-events: none; user-select: none; opacity: .9; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
 
-    .swipe-hint{
-      position: fixed;
-      left: 0; right: 0;
-      bottom: calc(env(safe-area-inset-bottom) + 10px);
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted, #9aa0a6);
-      pointer-events: none;
-      user-select: none;
-      opacity: .9;
-      text-shadow: 0 1px 2px rgba(0,0,0,.35);
-    }
+    /* ⚙️ settings button */
+    #settingsBtn { position:absolute; top:8px; left:8px; background:none; border:none; font-size:20px; line-height:1; padding:4px; cursor:pointer; color:var(--muted); }
+    #settingsBtn:hover { opacity: 0.8; }
+
+    /* ⚙️ settings panel */
+    #settingsPanel { position:absolute; top:40px; left:8px; width:min(280px, calc(100% - 16px)); background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:12px; display:none; box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04) inset; backdrop-filter: blur(10px) saturate(1.05); -webkit-backdrop-filter: blur(10px) saturate(1.05); }
+    #settingsPanel header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-weight:700; font-size:14px; color:var(--muted); }
+    #closeSettings { background:none; border:none; font-size:18px; line-height:1; color:var(--muted); cursor:pointer; }
+    .settings-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; margin:8px 0; }
+    .settings-kv { color:var(--muted); }
+
+    /* update button */
+    .settings-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    .settings-actions .mini { padding:6px 10px; border-radius:8px; border:1px solid var(--glass-border); background:var(--button); color:var(--text); font-size:13px; cursor:pointer; }
+    .settings-actions .mini:active { transform: scale(.98); }
+    #updateStatus { font-size:12px; color:var(--muted); margin-top:6px; }
   </style>
 </head>
-
 <body>
   <div class="stage">
     <div class="dots"></div>
-
     <div class="card">
       <button id="settingsBtn" aria-label="Settings">⚙️</button>
 
@@ -181,11 +87,14 @@
           <div id="settingsTitle">Settings</div>
           <button id="closeSettings" aria-label="Close">✕</button>
         </header>
-
         <div class="settings-row">
           <div class="settings-kv">Version</div>
           <div><code id="appVersion">1.0.0</code></div>
         </div>
+        <div class="settings-actions">
+          <button class="mini" id="btnUpdate">Check for update</button>
+        </div>
+        <div id="updateStatus" aria-live="polite"></div>
       </div>
 
       <div class="row">
@@ -230,7 +139,7 @@
   <div class="swipe-hint" aria-hidden="true">Swipe up to close</div>
 
 <script>
-  // ------- State handling -------
+  // ------- State -------
   function has(k){ return localStorage.getItem(k) !== null; }
   function get(k,d){ return has(k) ? localStorage.getItem(k) : d; }
   function set(k,v){ localStorage.setItem(k, v); }
@@ -256,18 +165,11 @@
   function render(){
     document.getElementById('badge-mode').textContent = "MODE: " + state.mode.toUpperCase();
     document.getElementById('badge-fan').textContent  = "FAN: "  + state.fan.toUpperCase();
-
-    document.querySelectorAll('#mode-bar .seg').forEach(b=>{
-      b.classList.toggle('active', b.dataset.mode === state.mode);
-    });
-    document.querySelectorAll('#fan-bar .seg').forEach(b=>{
-      b.classList.toggle('active', b.dataset.fan === state.fan);
-    });
-
+    document.querySelectorAll('#mode-bar .seg').forEach(b=>{ b.classList.toggle('active', b.dataset.mode === state.mode); });
+    document.querySelectorAll('#fan-bar .seg').forEach(b=>{ b.classList.toggle('active', b.dataset.fan === state.fan); });
     const t = activeTemp();
     const tempEl = document.getElementById('temp');
     const hint = document.getElementById('temp-hint');
-
     if (t == null) {
       tempEl.textContent = "—°";
       hint.textContent = "Setpoint (mode OFF)";
@@ -281,85 +183,49 @@
     }
   }
 
-  function save(){
-    set("mode_state", state.mode);
-    set("fan_state",  state.fan);
-    set("heat_set",   state.heat);
-    set("cool_set",   state.cool);
-  }
+  function save(){ set("mode_state", state.mode); set("fan_state", state.fan); set("heat_set", state.heat); set("cool_set", state.cool); }
+  function changeTemp(delta){ if (activeTemp() == null) return; if (state.mode === "heat") state.heat = Math.max(40, Math.min(90, state.heat + delta)); else if (state.mode === "cool") state.cool = Math.max(40, Math.min(90, state.cool + delta)); render(); save(); }
 
-  function changeTemp(delta){
-    if (activeTemp() == null) return;
-    if (state.mode === "heat") state.heat = Math.max(40, Math.min(90, state.heat + delta));
-    else if (state.mode === "cool") state.cool = Math.max(40, Math.min(90, state.cool + delta));
-    render(); save();
-  }
-
-  // Press-and-hold
-  function setupHold(el, delta){
-    let holdTimer=null, repeatTimer=null, accelTimer=null;
-    const start = (e) => {
-      e.preventDefault();
-      changeTemp(delta);
-      holdTimer = setTimeout(() => {
-        repeatTimer = setInterval(() => changeTemp(delta), 120);
-        accelTimer = setTimeout(() => {
-          clearInterval(repeatTimer);
-          repeatTimer = setInterval(() => changeTemp(delta), 60);
-        }, 1000);
-      }, 380);
-    };
-    const stop = () => {
-      clearTimeout(holdTimer); clearTimeout(accelTimer); clearInterval(repeatTimer);
-    };
-    el.addEventListener('pointerdown', start, {passive:false});
-    ['pointerup','pointerleave','pointercancel'].forEach(ev => el.addEventListener(ev, stop));
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-    window.addEventListener('blur', stop);
-  }
+  function setupHold(el, delta){ let holdTimer=null, repeatTimer=null, accelTimer=null; const start = (e) => { e.preventDefault(); changeTemp(delta); holdTimer = setTimeout(() => { repeatTimer = setInterval(() => changeTemp(delta), 120); accelTimer = setTimeout(() => { clearInterval(repeatTimer); repeatTimer = setInterval(() => changeTemp(delta), 60); }, 1000); }, 380); }; const stop = () => { clearTimeout(holdTimer); clearTimeout(accelTimer); clearInterval(repeatTimer); }; el.addEventListener('pointerdown', start, {passive:false}); ['pointerup','pointerleave','pointercancel'].forEach(ev => el.addEventListener(ev, stop)); document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); }); window.addEventListener('blur', stop); }
   setupHold(document.getElementById('btn-up'),   +1);
   setupHold(document.getElementById('btn-down'), -1);
 
-  // Mode/Fan clicks
-  document.querySelectorAll('#mode-bar .seg').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.mode = btn.dataset.mode; render(); save();
-    });
-  });
-  document.querySelectorAll('#fan-bar .seg').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.fan = btn.dataset.fan; render(); save();
-    });
-  });
+  document.querySelectorAll('#mode-bar .seg').forEach(btn=>{ btn.addEventListener('click', ()=>{ state.mode = btn.dataset.mode; render(); save(); }); });
+  document.querySelectorAll('#fan-bar .seg').forEach(btn=>{ btn.addEventListener('click', ()=>{ state.fan = btn.dataset.fan; render(); save(); }); });
 
   render();
 
-  // Service Worker registration
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js');
-    });
-  }
+  if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js'); }); }
 
-  // ----- Settings panel wiring -----
+  // ----- Settings Panel -----
   const APP_VERSION = "1.0.0";
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsPanel = document.getElementById('settingsPanel');
   const closeSettings = document.getElementById('closeSettings');
-  document.getElementById('appVersion').textContent = APP_VERSION;
+  const versionEl = document.getElementById('appVersion');
+  versionEl.textContent = APP_VERSION;
 
   function showPanel(show){ settingsPanel.style.display = show ? 'block' : 'none'; }
+  settingsBtn.addEventListener('click', (e)=>{ e.stopPropagation(); showPanel(settingsPanel.style.display !== 'block'); });
+  closeSettings.addEventListener('click', ()=>showPanel(false));
+  document.addEventListener('click', (e)=>{ if (settingsPanel.style.display === 'block' && !settingsPanel.contains(e.target) && e.target !== settingsBtn) showPanel(false); });
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') showPanel(false); });
 
-  settingsBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    showPanel(settingsPanel.style.display !== 'block');
-  });
-  closeSettings.addEventListener('click', () => showPanel(false));
-  document.addEventListener('click', (e) => {
-    if (settingsPanel.style.display === 'block' && !settingsPanel.contains(e.target) && e.target !== settingsBtn)
-      showPanel(false);
-  });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') showPanel(false); });
+  // ----- Force Update button -----
+  const btnUpdate = document.getElementById('btnUpdate');
+  const updateStatus = document.getElementById('updateStatus');
+  async function forceUpdate(){
+    if (!('serviceWorker' in navigator)) { updateStatus.textContent = 'No service worker present.'; return; }
+    try {
+      updateStatus.textContent = 'Checking for update…';
+      const reg = await navigator.serviceWorker.getRegistration();
+      await reg?.update();
+      setTimeout(()=>{ updateStatus.textContent = 'Reloading…'; window.location.reload(); }, 300);
+    } catch(e){
+      updateStatus.textContent = 'Update check failed.'; console.error(e);
+    }
+  }
+  btnUpdate.addEventListener('click', (e)=>{ e.stopPropagation(); forceUpdate(); });
 </script>
 </body>
 </html>
