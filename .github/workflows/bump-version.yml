@@ -1,0 +1,58 @@
+name: Auto-bump version and replace tokens
+
+on:
+  push:
+    branches: [ main ]  # change if your default branch is different
+
+jobs:
+  bump-version:
+    # prevent infinite loops when the action's own commit pushes again
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Read current version (or init)
+        id: get_version
+        run: |
+          if [ -f version.txt ]; then
+            VER=$(cat version.txt | tr -d ' \t\r\n')
+          else
+            VER="1.0.0"
+          fi
+          echo "current=$VER" >> $GITHUB_OUTPUT
+
+      - name: Increment patch version
+        id: inc_version
+        run: |
+          IFS='.' read -r MAJ MIN PATCH <<<"${{ steps.get_version.outputs.current }}"
+          PATCH=$((PATCH+1))
+          NEW_VER="$MAJ.$MIN.$PATCH"
+          echo "$NEW_VER" > version.txt
+          echo "new=$NEW_VER" >> $GITHUB_OUTPUT
+
+      - name: Replace __VERSION__ tokens
+        run: |
+          # replace in index.html
+          sed -i "s|__VERSION__|${{ steps.inc_version.outputs.new }}|g" index.html
+          # replace in service worker if you added the token there
+          if [ -f service-worker.js ]; then
+            sed -i "s|__VERSION__|${{ steps.inc_version.outputs.new }}|g" service-worker.js
+          fi
+
+      - name: Commit and push bumped version
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add version.txt index.html service-worker.js || true
+          # If nothing changed (edge case), exit gracefully
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Bump version to ${{ steps.inc_version.outputs.new }}"
+          git push
