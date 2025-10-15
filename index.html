@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0e1217">
-  <meta name="app-version" content="1.0.6">
+  <!-- Fallback version; will be replaced at runtime by version.txt -->
+  <meta name="app-version" content="0.0.0">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
-  <title>Thermostat_</title>
+  <title>Thermostat</title>
 
   <style>
     :root {
@@ -35,17 +36,9 @@
     }
 
     /* 🔒 Disable text selection globally */
-    * {
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-    input, textarea {
-      -webkit-user-select: text;
-      user-select: text;
-    }
+    * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
+    input, textarea { -webkit-user-select: text; user-select: text; }
 
-    * { box-sizing: border-box; }
     html, body {
       height: 100%;
       margin: 0;
@@ -65,9 +58,7 @@
     }
 
     .dots {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+      position: absolute; inset: 0; pointer-events: none;
       background-image:
         radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.08) 30%, transparent 30%),
         radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,0.06) 30%, transparent 30%),
@@ -134,30 +125,45 @@
       text-shadow: 0 1px 2px rgba(0,0,0,.35);
     }
 
-    #settingsBtn {
-      position:absolute; top:8px; left:8px;
-      background:none; border:none; font-size:20px; line-height:1;
-      padding:4px; cursor:pointer; color:var(--muted);
-    }
-
+    /* ⚙️ Settings UI */
+    #settingsBtn { position:absolute; top:8px; left:8px; background:none; border:none; font-size:20px; line-height:1; padding:4px; cursor:pointer; color:var(--muted); }
     #settingsPanel{
       position:absolute; top:40px; left:8px;
-      width:min(280px, calc(100% - 16px));
+      width:min(300px, calc(100% - 16px));
       background: var(--panel-bg);
       border: 1px solid var(--panel-border-strong);
       border-radius:12px;
       padding:12px;
       display:none;
       box-shadow:0 8px 24px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px) saturate(1.1);
+      -webkit-backdrop-filter: blur(10px) saturate(1.1);
     }
     #settingsPanel header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-weight:700; font-size:14px; color:var(--muted); }
     #closeSettings{ background:none; border:none; font-size:18px; line-height:1; color:var(--muted); cursor:pointer; }
     .settings-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; margin:8px 0; }
     .settings-kv{ color:var(--muted); }
-    .settings-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-    .settings-actions .mini { padding:6px 10px; border-radius:8px; border:1px solid var(--glass-border); background:var(--button); color:var(--text); font-size:13px; cursor:pointer; }
-    .settings-actions .mini:active { transform: scale(.98); }
-    #updateStatus { font-size:12px; color:var(--muted); margin-top:6px; }
+
+    /* Compact action grid */
+    .settings-actions{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .settings-actions .mini{
+      display:flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--glass-border);
+      font-size:12px; font-weight:600; letter-spacing:.2px;
+      color: var(--text);
+      box-shadow: 0 1px 0 rgba(0,0,0,.15) inset;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease, opacity .2s;
+    }
+    .settings-actions .mini:active{ transform: translateY(1px) scale(.98); }
+    #updateStatus { margin-top:8px; font-size:12px; color:var(--muted); }
   </style>
 </head>
 
@@ -167,6 +173,7 @@
 
     <div class="card">
       <button id="settingsBtn" aria-label="Settings">⚙️</button>
+
       <div id="settingsPanel" role="dialog" aria-modal="false" aria-labelledby="settingsTitle">
         <header>
           <div id="settingsTitle">Settings</div>
@@ -174,7 +181,7 @@
         </header>
         <div class="settings-row">
           <div class="settings-kv">Version</div>
-          <div><code id="appVersion">1.0.6</code></div>
+          <div><code id="appVersion">—</code></div>
         </div>
         <div class="settings-actions">
           <button class="mini" id="btnUpdate">Check for update</button>
@@ -224,6 +231,7 @@
   <div class="swipe-hint" aria-hidden="true">Swipe up to close</div>
 
   <script>
+    /* ---------- Local state ---------- */
     function has(k){ return localStorage.getItem(k)!==null; }
     function get(k,d){ return has(k)?localStorage.getItem(k):d; }
     function set(k,v){ localStorage.setItem(k,v); }
@@ -235,11 +243,7 @@
 
     const state={mode:get("mode_state","off"),fan:get("fan_state","auto"),heat:parseInt(get("heat_set","70"),10),cool:parseInt(get("cool_set","75"),10)};
 
-    function activeTemp(){
-      if(state.mode==="heat")return state.heat;
-      if(state.mode==="cool")return state.cool;
-      return null;
-    }
+    function activeTemp(){ if(state.mode==="heat")return state.heat; if(state.mode==="cool")return state.cool; return null; }
 
     function render(){
       document.getElementById('badge-mode').textContent="MODE: "+state.mode.toUpperCase();
@@ -252,18 +256,48 @@
     }
 
     function save(){set("mode_state",state.mode);set("fan_state",state.fan);set("heat_set",state.heat);set("cool_set",state.cool);}
-    function changeTemp(delta){if(activeTemp()==null)return;if(state.mode==="heat")state.heat=Math.max(40,Math.min(90,state.heat+delta));else if(state.mode==="cool")state.cool=Math.max(40,Math.min(90,state.cool+delta));render();save();}
-    function setupHold(el,delta){let holdTimer=null,repeatTimer=null,accelTimer=null;const start=e=>{e.preventDefault();changeTemp(delta);holdTimer=setTimeout(()=>{repeatTimer=setInterval(()=>changeTemp(delta),120);accelTimer=setTimeout(()=>{clearInterval(repeatTimer);repeatTimer=setInterval(()=>changeTemp(delta),60);},1000);},380);};const stop=()=>{clearTimeout(holdTimer);clearTimeout(accelTimer);clearInterval(repeatTimer);};el.addEventListener('pointerdown',start,{passive:false});['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop));document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});window.addEventListener('blur',stop);}
+    function changeTemp(delta){ if(activeTemp()==null)return; if(state.mode==="heat")state.heat=Math.max(40,Math.min(90,state.heat+delta)); else if(state.mode==="cool")state.cool=Math.max(40,Math.min(90,state.cool+delta)); render(); save(); }
+    function setupHold(el,delta){
+      let holdTimer=null,repeatTimer=null,accelTimer=null;
+      const start=e=>{e.preventDefault();changeTemp(delta);
+        holdTimer=setTimeout(()=>{repeatTimer=setInterval(()=>changeTemp(delta),120);
+          accelTimer=setTimeout(()=>{clearInterval(repeatTimer);repeatTimer=setInterval(()=>changeTemp(delta),60);},1000);
+        },380);
+      };
+      const stop=()=>{clearTimeout(holdTimer);clearTimeout(accelTimer);clearInterval(repeatTimer);};
+      el.addEventListener('pointerdown',start,{passive:false});
+      ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop));
+      document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+      window.addEventListener('blur',stop);
+    }
+
     setupHold(document.getElementById('btn-up'),+1);
     setupHold(document.getElementById('btn-down'),-1);
     document.querySelectorAll('#mode-bar .seg').forEach(btn=>btn.addEventListener('click',()=>{state.mode=btn.dataset.mode;render();save();}));
     document.querySelectorAll('#fan-bar .seg').forEach(btn=>btn.addEventListener('click',()=>{state.fan=btn.dataset.fan;render();save();}));
     render();
-    if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
 
-    const APP_VERSION=document.querySelector('meta[name="app-version"]').content;
-    document.getElementById('appVersion').textContent=APP_VERSION;
+    /* ---------- SW ---------- */
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', ()=>navigator.serviceWorker.register('./service-worker.js'));
+    }
 
+    /* ---------- Version (auto from version.txt with fallback to meta) ---------- */
+    async function updateVersionLabel(){
+      const meta = document.querySelector('meta[name="app-version"]');
+      let ver = meta?.content || '0.0.0';
+      try{
+        const res = await fetch('./version.txt?ts=' + Date.now(), { cache: 'no-store' });
+        if(res.ok){
+          const t = (await res.text()).trim();
+          if(t) ver = t;
+          if(meta) meta.content = ver;
+        }
+      }catch{}
+      document.getElementById('appVersion').textContent = ver;
+    }
+
+    /* ---------- Settings panel + update button ---------- */
     const settingsBtn=document.getElementById('settingsBtn');
     const settingsPanel=document.getElementById('settingsPanel');
     const closeSettings=document.getElementById('closeSettings');
@@ -310,7 +344,7 @@
     async function promptAndSaveTokens(){
       const access = prompt('Paste Ecobee access_token'); if(!access) return;
       const refresh = prompt('Paste Ecobee refresh_token'); if(!refresh) return;
-      const expires_at = new Date(Date.now() + 45*60*1000).toISOString(); // temp
+      const expires_at = new Date(Date.now() + 45*60*1000).toISOString(); // temp bootstrap
       updateStatus.textContent='Saving…';
       try{
         await fetchJSON('/token/save', {
@@ -360,10 +394,18 @@
     document.getElementById('btnApiTest')    ?.addEventListener('click', e => { e.stopPropagation(); callBffTest(); });
     document.getElementById('btnEcobeeTest') ?.addEventListener('click', e => { e.stopPropagation(); callEcobeeSummary(); });
 
-    // Optional: auto-check when the panel opens
+    // When panel opens, show current token status and version
     settingsBtn.addEventListener('click', () => {
-      setTimeout(() => { if (settingsPanel.style.display === 'block') checkTokenStatus(); }, 60);
+      setTimeout(() => {
+        if (settingsPanel.style.display === 'block') {
+          checkTokenStatus();
+          updateVersionLabel();
+        }
+      }, 60);
     });
+
+    // Also update version once on first load
+    updateVersionLabel();
   </script>
 </body>
 </html>
