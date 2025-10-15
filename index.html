@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0e1217">
-  <!-- Version token for GitHub Action -->
-  <meta name="app-version" content="1.0.5">
+  <meta name="app-version" content="__VERSION__">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
   <title>Thermostat</title>
+
   <style>
     :root {
       --bg1: #0e1217;
@@ -34,6 +34,17 @@
       }
     }
 
+    /* 🔒 Disable text selection globally */
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
     * { box-sizing: border-box; }
     html, body {
       height: 100%;
@@ -52,6 +63,7 @@
       display: grid;
       place-items: center;
     }
+
     .dots {
       position: absolute;
       inset: 0;
@@ -122,7 +134,6 @@
       text-shadow: 0 1px 2px rgba(0,0,0,.35);
     }
 
-    /* ⚙️ settings button */
     #settingsBtn {
       position:absolute; top:8px; left:8px;
       background:none; border:none; font-size:20px; line-height:1;
@@ -149,6 +160,7 @@
     #updateStatus { font-size:12px; color:var(--muted); margin-top:6px; }
   </style>
 </head>
+
 <body>
   <div class="stage">
     <div class="dots"></div>
@@ -163,8 +175,7 @@
         </header>
         <div class="settings-row">
           <div class="settings-kv">Version</div>
-          <!-- Version token here -->
-          <div><code id="appVersion">1.0.5</code></div>
+          <div><code id="appVersion">__VERSION__</code></div>
         </div>
         <div class="settings-actions">
           <button class="mini" id="btnUpdate">Check for update</button>
@@ -176,7 +187,7 @@
         <div class="title title-main">THERMOSTAT</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <div id="badge-mode" class="badge">MODE: —</div>
-          <div id="badge-fan"  class="badge">FAN: —</div>
+          <div id="badge-fan" class="badge">FAN: —</div>
         </div>
       </div>
 
@@ -191,7 +202,6 @@
       </div>
 
       <div class="sp"></div>
-
       <div class="title">Mode</div>
       <div class="segments" id="mode-bar">
         <button class="seg" data-mode="heat">Heat</button>
@@ -200,7 +210,6 @@
       </div>
 
       <div class="sp"></div>
-
       <div class="title">Fan</div>
       <div class="segments" id="fan-bar">
         <button class="seg" data-fan="on">On</button>
@@ -211,109 +220,71 @@
 
   <div class="swipe-hint" aria-hidden="true">Swipe up to close</div>
 
-<script>
-  function has(k){ return localStorage.getItem(k) !== null; }
-  function get(k,d){ return has(k) ? localStorage.getItem(k) : d; }
-  function set(k,v){ localStorage.setItem(k, v); }
+  <script>
+    function has(k){ return localStorage.getItem(k)!==null; }
+    function get(k,d){ return has(k)?localStorage.getItem(k):d; }
+    function set(k,v){ localStorage.setItem(k,v); }
 
-  if (!has("mode_state")) set("mode_state","off");
-  if (!has("fan_state"))  set("fan_state","auto");
-  if (!has("heat_set"))   set("heat_set","70");
-  if (!has("cool_set"))   set("cool_set","75");
+    if(!has("mode_state"))set("mode_state","off");
+    if(!has("fan_state"))set("fan_state","auto");
+    if(!has("heat_set"))set("heat_set","70");
+    if(!has("cool_set"))set("cool_set","75");
 
-  const state = {
-    mode: get("mode_state","off"),
-    fan:  get("fan_state","auto"),
-    heat: parseInt(get("heat_set","70"),10),
-    cool: parseInt(get("cool_set","75"),10)
-  };
+    const state={mode:get("mode_state","off"),fan:get("fan_state","auto"),heat:parseInt(get("heat_set","70"),10),cool:parseInt(get("cool_set","75"),10)};
 
-  function activeTemp(){
-    if (state.mode === "heat") return state.heat;
-    if (state.mode === "cool") return state.cool;
-    return null;
-  }
-
-  function render(){
-    document.getElementById('badge-mode').textContent = "MODE: " + state.mode.toUpperCase();
-    document.getElementById('badge-fan').textContent  = "FAN: "  + state.fan.toUpperCase();
-    document.querySelectorAll('#mode-bar .seg').forEach(b=>b.classList.toggle('active', b.dataset.mode === state.mode));
-    document.querySelectorAll('#fan-bar .seg').forEach(b=>b.classList.toggle('active', b.dataset.fan === state.fan));
-    const t = activeTemp();
-    const tempEl = document.getElementById('temp');
-    const hint = document.getElementById('temp-hint');
-    if (t == null) {
-      tempEl.textContent = "—°";
-      hint.textContent = "Setpoint (mode OFF)";
-      document.getElementById('btn-up').disabled = true;
-      document.getElementById('btn-down').disabled = true;
-    } else {
-      tempEl.textContent = String(t) + "°";
-      hint.textContent = "Setpoint";
-      document.getElementById('btn-up').disabled = false;
-      document.getElementById('btn-down').disabled = false;
+    function activeTemp(){
+      if(state.mode==="heat")return state.heat;
+      if(state.mode==="cool")return state.cool;
+      return null;
     }
-  }
 
-  function save(){ set("mode_state", state.mode); set("fan_state", state.fan); set("heat_set", state.heat); set("cool_set", state.cool); }
-
-  function changeTemp(delta){
-    if (activeTemp() == null) return;
-    if (state.mode === "heat") state.heat = Math.max(40, Math.min(90, state.heat + delta));
-    else if (state.mode === "cool") state.cool = Math.max(40, Math.min(90, state.cool + delta));
-    render(); save();
-  }
-
-  function setupHold(el, delta){
-    let holdTimer=null, repeatTimer=null, accelTimer=null;
-    const start = (e)=>{ e.preventDefault(); changeTemp(delta);
-      holdTimer = setTimeout(()=>{ repeatTimer = setInterval(()=>changeTemp(delta),120);
-      accelTimer = setTimeout(()=>{ clearInterval(repeatTimer);
-      repeatTimer = setInterval(()=>changeTemp(delta),60); },1000); },380); };
-    const stop = ()=>{ clearTimeout(holdTimer); clearTimeout(accelTimer); clearInterval(repeatTimer); };
-    el.addEventListener('pointerdown', start, {passive:false});
-    ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev, stop));
-    document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stop(); });
-    window.addEventListener('blur', stop);
-  }
-  setupHold(document.getElementById('btn-up'), +1);
-  setupHold(document.getElementById('btn-down'), -1);
-
-  document.querySelectorAll('#mode-bar .seg').forEach(btn=>btn.addEventListener('click', ()=>{ state.mode = btn.dataset.mode; render(); save(); }));
-  document.querySelectorAll('#fan-bar .seg').forEach(btn=>btn.addEventListener('click', ()=>{ state.fan = btn.dataset.fan; render(); save(); }));
-
-  render();
-
-  if ('serviceWorker' in navigator) window.addEventListener('load', ()=>navigator.serviceWorker.register('./service-worker.js'));
-
-  // Read version from meta tag (replaced by workflow)
-  const APP_VERSION = document.querySelector('meta[name="app-version"]').content;
-  document.getElementById('appVersion').textContent = APP_VERSION;
-
-  const settingsBtn = document.getElementById('settingsBtn');
-  const settingsPanel = document.getElementById('settingsPanel');
-  const closeSettings = document.getElementById('closeSettings');
-  const btnUpdate = document.getElementById('btnUpdate');
-  const updateStatus = document.getElementById('updateStatus');
-
-  function showPanel(show){ settingsPanel.style.display = show ? 'block' : 'none'; }
-  settingsBtn.addEventListener('click', e=>{ e.stopPropagation(); showPanel(settingsPanel.style.display !== 'block'); });
-  closeSettings.addEventListener('click', ()=>showPanel(false));
-  document.addEventListener('click', e=>{ if(settingsPanel.style.display==='block' && !settingsPanel.contains(e.target) && e.target!==settingsBtn) showPanel(false); });
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') showPanel(false); });
-
-  async function forceUpdate(){
-    if(!('serviceWorker' in navigator)){ updateStatus.textContent='No service worker present.'; return; }
-    try{
-      updateStatus.textContent='Checking for update…';
-      const reg = await navigator.serviceWorker.getRegistration();
-      await reg?.update();
-      setTimeout(()=>{ updateStatus.textContent='Reloading…'; window.location.reload(); },300);
-    }catch(e){
-      updateStatus.textContent='Update check failed.'; console.error(e);
+    function render(){
+      document.getElementById('badge-mode').textContent="MODE: "+state.mode.toUpperCase();
+      document.getElementById('badge-fan').textContent="FAN: "+state.fan.toUpperCase();
+      document.querySelectorAll('#mode-bar .seg').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));
+      document.querySelectorAll('#fan-bar .seg').forEach(b=>b.classList.toggle('active',b.dataset.fan===state.fan));
+      const t=activeTemp(),tempEl=document.getElementById('temp'),hint=document.getElementById('temp-hint');
+      if(t==null){tempEl.textContent="—°";hint.textContent="Setpoint (mode OFF)";document.getElementById('btn-up').disabled=true;document.getElementById('btn-down').disabled=true;}
+      else{tempEl.textContent=String(t)+"°";hint.textContent="Setpoint";document.getElementById('btn-up').disabled=false;document.getElementById('btn-down').disabled=false;}
     }
-  }
-  btnUpdate.addEventListener('click', e=>{ e.stopPropagation(); forceUpdate(); });
-</script>
+
+    function save(){set("mode_state",state.mode);set("fan_state",state.fan);set("heat_set",state.heat);set("cool_set",state.cool);}
+    function changeTemp(delta){if(activeTemp()==null)return;if(state.mode==="heat")state.heat=Math.max(40,Math.min(90,state.heat+delta));else if(state.mode==="cool")state.cool=Math.max(40,Math.min(90,state.cool+delta));render();save();}
+    function setupHold(el,delta){let holdTimer=null,repeatTimer=null,accelTimer=null;const start=e=>{e.preventDefault();changeTemp(delta);holdTimer=setTimeout(()=>{repeatTimer=setInterval(()=>changeTemp(delta),120);accelTimer=setTimeout(()=>{clearInterval(repeatTimer);repeatTimer=setInterval(()=>changeTemp(delta),60);},1000);},380);};const stop=()=>{clearTimeout(holdTimer);clearTimeout(accelTimer);clearInterval(repeatTimer);};el.addEventListener('pointerdown',start,{passive:false});['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop));document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});window.addEventListener('blur',stop);}
+    setupHold(document.getElementById('btn-up'),+1);
+    setupHold(document.getElementById('btn-down'),-1);
+    document.querySelectorAll('#mode-bar .seg').forEach(btn=>btn.addEventListener('click',()=>{state.mode=btn.dataset.mode;render();save();}));
+    document.querySelectorAll('#fan-bar .seg').forEach(btn=>btn.addEventListener('click',()=>{state.fan=btn.dataset.fan;render();save();}));
+    render();
+    if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
+
+    const APP_VERSION=document.querySelector('meta[name="app-version"]').content;
+    document.getElementById('appVersion').textContent=APP_VERSION;
+
+    const settingsBtn=document.getElementById('settingsBtn');
+    const settingsPanel=document.getElementById('settingsPanel');
+    const closeSettings=document.getElementById('closeSettings');
+    const btnUpdate=document.getElementById('btnUpdate');
+    const updateStatus=document.getElementById('updateStatus');
+
+    function showPanel(show){settingsPanel.style.display=show?'block':'none';}
+    settingsBtn.addEventListener('click',e=>{e.stopPropagation();showPanel(settingsPanel.style.display!=='block');});
+    closeSettings.addEventListener('click',()=>showPanel(false));
+    document.addEventListener('click',e=>{if(settingsPanel.style.display==='block'&&!settingsPanel.contains(e.target)&&e.target!==settingsBtn)showPanel(false);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')showPanel(false);});
+
+    async function forceUpdate(){
+      if(!('serviceWorker'in navigator)){updateStatus.textContent='No service worker present.';return;}
+      try{
+        updateStatus.textContent='Checking for update…';
+        const reg=await navigator.serviceWorker.getRegistration();
+        await reg?.update();
+        setTimeout(()=>{updateStatus.textContent='Reloading…';window.location.reload();},300);
+      }catch(e){
+        updateStatus.textContent='Update check failed.';console.error(e);
+      }
+    }
+    btnUpdate.addEventListener('click',e=>{e.stopPropagation();forceUpdate();});
+  </script>
 </body>
 </html>
